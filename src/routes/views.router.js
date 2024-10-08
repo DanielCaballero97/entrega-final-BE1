@@ -1,0 +1,43 @@
+import { Router } from "express";
+import Product from "../models/Product.js";
+import Cart from "../models/Cart.js"
+
+const viewsRouter = Router();
+
+
+viewsRouter.get("/",(req,res)=>{
+    res.render("home")
+})
+
+viewsRouter.get("/carts/:cid",async (req,res)=>{
+    const { cid } = req.params;
+    console.log(cid)
+    const cart = await Cart.findOne({_id:cid}).populate();
+    console.log(cart)
+    res.json(cart)
+})
+
+viewsRouter.get('/products',async (req,res)=>{
+    try {
+        const { page = 1, limit = 10, filter , sortOrder} = req.query
+        const products = await Product.paginate({},{page , limit , sort:(`${filter} ${sortOrder}`)})
+        const result = {
+            payload:products.docs,
+            nextPage:products.nextPage,
+            prevPage:products.prevPage,
+            hasNextPage:products.hasNextPage,
+            hasPrevPage:products.hasNextPage,
+            nextLink: `?page=${products.nextPage}&limit=${limit}&filter=${filter}&sortOrder=${sortOrder}`,
+            prevLink: `?page=${products.prevPage}&limit=${limit}&filter=${filter}&sortOrder=${sortOrder}`,
+            totalPages:products.totalPages,
+            page:products.page
+        }
+    res.status(200).render('index',{result})
+    } catch (error) {
+        res.json(error)
+    }
+})
+
+
+export default viewsRouter;
+
