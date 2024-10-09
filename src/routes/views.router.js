@@ -10,11 +10,14 @@ viewsRouter.get("/",(req,res)=>{
 })
 
 viewsRouter.get("/carts/:cid",async (req,res)=>{
-    const { cid } = req.params;
-    console.log(cid)
-    const cart = await Cart.findOne({_id:cid}).populate();
-    console.log(cart)
-    res.json(cart)
+    try {
+        const { cid } = req.params;
+        const cart = await Cart.findOne({_id:cid}).populate();
+        res.status(200).render("cartView",{cart})
+    } catch (error) {
+        res.json(error)
+    }
+
 })
 
 viewsRouter.get('/products',async (req,res)=>{
